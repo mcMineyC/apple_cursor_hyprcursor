@@ -59,6 +59,7 @@ jobs:
         with:
           name: macOS
           path: bin/macOS
+          
       - uses: actions/upload-artifact@v4
         with:
           name: macOS-White
