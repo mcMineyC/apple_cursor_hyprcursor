@@ -19,7 +19,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-24.10]
         python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
@@ -59,3 +59,44 @@ jobs:
 
       - name: Build
         run: yarn build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macOS
+          path: bin/macOS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macOS-White
+          path: bin/macOS-White
+      
+      
+      - name: Install Hypr dependencies
+        run: |
+          sudo apt install cmake git build-essential \
+            libzip-dev librsvg2-dev libtomlplusplus-dev libcairo2-dev \
+            xcur2png
+      
+      - name: Install hyprlang
+        run: |
+          git clone https://github.com/hyprwm/hyprlang
+          cd hyprlang
+          cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build
+          cmake --build ./build --config Release --target hyprlang -j`nproc 2>/dev/null || getconf _NPROCESSORS_CONF`
+          sudo cmake --install ./build
+      - name: Install hyprcursor
+        run: |
+          git clone https://github.com/hyprwm/hyprcursor
+          cd hyprcursor
+          cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -S . -B ./build
+          cmake --build ./build --config Release --target all -j`nproc 2>/dev/null || getconf _NPROCESSORS_CONF`
+          sudo cmake --install build
+      - name: Generate hyprcursors from xcursors
+        run: |
+          hyprcursor-util -x themes/macOS
+          cp manifest.hl themes/extracted_macOS
+          hyprcursor-util -c themes/extracted_macOS
+      
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macOS-hyprcursor
+          path: bin/theme_macOS
+

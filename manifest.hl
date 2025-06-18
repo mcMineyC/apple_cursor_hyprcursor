@@ -1,4 +1,4 @@
-name = Apple Cursos
-description = Free & Open source macOS cursors
+name = macOS
+description = Free & Open Source cursors
 version = 0.1
-cursors_directory = svg
+cursors_directory = hyprcursors
